@@ -14,7 +14,7 @@ class CausalData(Dataset):
         prompt = self.data.iloc[idx]['input']
         hypothesis_match = re.search(r"Hypothesis:\s*(.*)", prompt, re.IGNORECASE)
         return {"subject": hypothesis_match.group(1).strip(),
-                "prompt": prompt,
+                "prompt": "Answer using True or False. " + prompt,
                 "expect": self.data.iloc[idx]['label']}
 
 if __name__ == '__main__':
