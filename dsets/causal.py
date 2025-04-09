@@ -4,6 +4,12 @@ import re
 from torch.utils.data import Dataset
 import pandas as pd
 
+def bin_to_logic(bin):
+    if bin == 0:
+        return "No"
+    elif bin == 1:
+        return "Yes"
+    
 class CausalData(Dataset):
     def __init__(self, data_pth):
         self.data = pd.read_csv(data_pth)
@@ -20,7 +26,7 @@ class CausalData(Dataset):
         return {"subject": hypothesis,
                 "premise": premise_match.group(1).strip(),
                 "prompt": f"Question: {premise} Can we deduct the following: {hypothesis}? Just answer 'Yes' or 'No.' Answer:",
-                "expect": self.data.iloc[idx]['label']}
+                "expect": bin_to_logic(self.data.iloc[idx]['label'])}
 
 if __name__ == '__main__':
     data = CausalData('/home/adiprs/workspace/causal-rome/dsets/test.csv')
