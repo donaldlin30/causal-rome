@@ -4,6 +4,8 @@ import os
 import re
 from collections import defaultdict
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "7"
+
 import numpy
 import torch
 from datasets import load_dataset
@@ -11,7 +13,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from dsets import KnownsDataset
+from dsets.causal import CausalData
 from rome.tok_dataset import (
     TokenizedDataset,
     dict_to_,
@@ -39,7 +41,7 @@ def main():
 
     aa(
         "--model_name",
-        default="gpt2-xl",
+        default="EleutherAI/gpt-neox-20b",
         choices=[
             "gpt2-xl",
             "EleutherAI/gpt-j-6B",
@@ -69,7 +71,7 @@ def main():
     mt = ModelAndTokenizer(args.model_name, torch_dtype=torch_dtype)
 
     if args.fact_file is None:
-        knowns = KnownsDataset(DATA_DIR)
+        knowns = CausalData(DATA_DIR)
     else:
         with open(args.fact_file) as f:
             knowns = json.load(f)
