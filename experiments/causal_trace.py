@@ -12,6 +12,7 @@ from datasets import load_dataset
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import numpy as np
 
 from dsets.causal import CausalData
 from rome.tok_dataset import (
@@ -532,7 +533,7 @@ def plot_hidden_flow(
     plot_trace_heatmap(result, savepdf)
 
 
-def plot_trace_heatmap(result, savepdf=None, title=None, xlabel=None, modelname=None):
+def plot_trace_heatmap(result, savepdf=None, title=None, xlabel=None, modelname=None, chunk_size=6):
     differences = result["scores"]
     low_score = result["low_score"]
     answer = result["answer"]
@@ -545,6 +546,14 @@ def plot_trace_heatmap(result, savepdf=None, title=None, xlabel=None, modelname=
     labels = list(result["input_tokens"])
     for i in range(*result["subject_range"]):
         labels[i] = labels[i] + "*"
+
+    num_chunks = (differences.shape[0] + chunk_size - 1) // chunk_size  # Calculate the number of chunks
+
+    chunked_differences = np.array_split(differences, num_chunks, axis=0)
+    chunked_labels_list = [labels[i * chunk_size:(i + 1) * chunk_size] for i in range(num_chunks)]
+
+    differences = np.array([np.mean(chunk, axis=0) for chunk in chunked_differences])
+    labels = [" ".join(chunk) for chunk in chunked_labels_list]
 
     with plt.rc_context(rc={"font.family": "Times New Roman"}):
         fig, ax = plt.subplots(figsize=(3.5, 2), dpi=200)
